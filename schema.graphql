@@ -11,6 +11,7 @@ type Token @entity {
   contract: TokenContract!
   tokenID: BigInt!
   owner: Owner!
+  creator: Owner!
   mintTime: BigInt!
   tokenURI: String!
   collection: Collection!

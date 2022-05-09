@@ -144,6 +144,7 @@ export function handleTransfer(event: Transfer): void {
         eip721Token = new Token(id);
         eip721Token.contract = tokenContract.id;
         eip721Token.tokenID = tokenId;
+        eip721Token.creator = newOwner.id
         eip721Token.mintTime = event.block.timestamp;
         eip721Token.isFreeMinted = event.transaction.from.toHex().toLowerCase() == OWNER_ADDRESS;
         eip721Token.transactionFee = event.transaction.gasPrice;
