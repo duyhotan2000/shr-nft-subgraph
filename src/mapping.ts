@@ -1,4 +1,4 @@
-import { BigInt, Bytes, log, store } from "@graphprotocol/graph-ts";
+import { BigDecimal, BigInt, Bytes, log, store } from "@graphprotocol/graph-ts";
 import {
   SHRNFTTest,
   // AdminChanged,
@@ -21,6 +21,7 @@ let ZERO_ADDRESS_STRING = "0x0000000000000000000000000000000000000000";
 let ZERO_ADDRESS: Bytes = Bytes.fromHexString(ZERO_ADDRESS_STRING) as Bytes;
 let ZERO = BigInt.fromI32(0);
 let ONE = BigInt.fromI32(1);
+let OWNER_ADDRESS = "0xFaBbAD57EA3352165dD4780849Be4132FD837015".toLowerCase();
 
 function toBytes(hexString: String): Bytes {
   let result = new Uint8Array(hexString.length / 2);
@@ -69,6 +70,8 @@ export function handleTransfer(event: Transfer): void {
     all = new All("all");
     all.numOwners = ZERO;
     all.numTokens = ZERO;
+    all.numFreeMintedTokens = ZERO;
+    all.totalFeeFreeMintedTokens = ZERO;
     // all.numTokenContracts = ZERO;
   }
 
@@ -142,6 +145,9 @@ export function handleTransfer(event: Transfer): void {
         eip721Token.contract = tokenContract.id;
         eip721Token.tokenID = tokenId;
         eip721Token.mintTime = event.block.timestamp;
+        eip721Token.isFreeMinted = event.transaction.from.toHex().toLowerCase() == OWNER_ADDRESS;
+        eip721Token.transactionFee = event.transaction.gasPrice;
+        eip721Token.transactionHash = event.transaction.hash.toHex();
         // if (tokenContract.supportsEIP721Metadata) {
         let metadataURI = contract.try_tokenURI(tokenId);
         if(!metadataURI.reverted) {
@@ -207,8 +213,16 @@ export function handleTransfer(event: Transfer): void {
         // mint +1
         all.numTokens = all.numTokens.plus(ONE);
         tokenContract.numTokens = tokenContract.numTokens.plus(ONE);
-        collection.tokens.push(eip721Token.id);
+        // collection.tokens = [...collection.tokens, eip721Token.id];
+        const tokens = collection.tokens;
+        tokens.push(eip721Token.id);
+        collection.tokens = tokens;
+        if(event.transaction.from.toHex().toLowerCase() == OWNER_ADDRESS) {
+          all.numFreeMintedTokens = all.numFreeMintedTokens.plus(ONE);
+          all.totalFeeFreeMintedTokens = all.totalFeeFreeMintedTokens.plus(event.transaction.gasPrice);
+        }
         collection.save();
+        all.save();
       } else {
         let isTokenFoundInCollection = false;
         for (let i = 0 ; i < collection.tokens.length ; i ++) {

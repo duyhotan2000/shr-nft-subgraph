@@ -2,6 +2,8 @@ type All @entity {
   id: ID!
   numTokens: BigInt!
   numOwners: BigInt!
+  numFreeMintedTokens: BigInt!
+  totalFeeFreeMintedTokens: BigInt!
 }
 
 type Token @entity {
@@ -12,6 +14,9 @@ type Token @entity {
   mintTime: BigInt!
   tokenURI: String!
   collection: Collection!
+  isFreeMinted: Boolean!
+  transactionFee: BigInt!
+  transactionHash: String!
 }
 
 type Collection @entity {
@@ -20,7 +25,7 @@ type Collection @entity {
   tokens: [Token!]!
   owners: [OwnerCollection!]! @derivedFrom(field: "collection")
 }
-
+  
 type OwnerCollection @entity {
   id: ID! # Set to `owner.id.concat(collection.id)`
   owner: Owner!
