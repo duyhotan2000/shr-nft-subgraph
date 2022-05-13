@@ -151,12 +151,10 @@ export function handleTransfer(event: Transfer): void {
         eip721Token.gasPrice = event.transaction.gasPrice;
         eip721Token.transactionHash = event.transaction.hash.toHex();
         let receipt = event.receipt;
-        log.warning("EVENT RECEIPT null", [receipt == null ? "NULL" : "NOT NULL"]);
         if(receipt == null) {
           eip721Token.gasUsed = ZERO;
           eip721Token.transactionFee = ZERO;
         } else {
-          log.warning("EVENT RECEIPT gasUsed", ["ABCD"]);
           eip721Token.gasUsed = receipt.gasUsed;
           eip721Token.transactionFee = receipt.gasUsed.times(event.transaction.gasPrice);
         }
@@ -234,7 +232,7 @@ export function handleTransfer(event: Transfer): void {
         if (event.transaction.from.toHex().toLowerCase() == OWNER_ADDRESS) {
           all.numFreeMintedTokens = all.numFreeMintedTokens.plus(ONE);
           all.totalFeeFreeMintedTokens = all.totalFeeFreeMintedTokens.plus(
-            event.transaction.gasPrice
+            eip721Token.transactionFee
           );
         }
         collection.save();
