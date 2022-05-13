@@ -150,9 +150,15 @@ export function handleTransfer(event: Transfer): void {
           event.transaction.from.toHex().toLowerCase() == OWNER_ADDRESS;
         eip721Token.gasPrice = event.transaction.gasPrice;
         eip721Token.transactionHash = event.transaction.hash.toHex();
-        if(event.receipt != null) {
-          eip721Token.gasUsed = event.receipt!.gasUsed;
-          eip721Token.transactionFee = eip721Token.gasUsed.times(eip721Token.gasPrice);
+        let receipt = event.receipt;
+        log.warning("EVENT RECEIPT null", [receipt == null ? "NULL" : "NOT NULL"]);
+        if(receipt == null) {
+          eip721Token.gasUsed = ZERO;
+          eip721Token.transactionFee = ZERO;
+        } else {
+          log.warning("EVENT RECEIPT gasUsed", ["ABCD"]);
+          eip721Token.gasUsed = receipt.gasUsed;
+          eip721Token.transactionFee = receipt.gasUsed.times(event.transaction.gasPrice);
         }
         // if (tokenContract.supportsEIP721Metadata) {
         let metadataURI = contract.try_tokenURI(tokenId);
@@ -219,7 +225,10 @@ export function handleTransfer(event: Transfer): void {
         // mint +1
         all.numTokens = all.numTokens.plus(ONE);
         tokenContract.numTokens = tokenContract.numTokens.plus(ONE);
-        const tokens = collection.tokens;
+        let tokens = collection.tokens;
+        if(tokens == null) {
+          tokens = [];
+        }
         tokens.push(eip721Token.id);
         collection.tokens = tokens;
         if (event.transaction.from.toHex().toLowerCase() == OWNER_ADDRESS) {
@@ -232,8 +241,12 @@ export function handleTransfer(event: Transfer): void {
         all.save();
       } else {
         let isTokenFoundInCollection = false;
-        for (let i = 0; i < collection.tokens.length; i++) {
-          const token = Token.load(collection.tokens[i]);
+        let tokens = collection.tokens;
+        if(tokens == null) {
+          tokens = [];
+        }
+        for (let i = 0; i < tokens.length; i++) {
+          const token = Token.load(tokens[i]);
           if (token == null) {
             continue;
           }

@@ -16,16 +16,16 @@ type Token @entity {
   tokenURI: String!
   collection: Collection!
   isFreeMinted: Boolean!
-  transactionFee: BigInt!
+  transactionFee: BigInt
   transactionHash: String!
-  gasPrice: BigInt!
-  gasUsed: BigInt!
+  gasPrice: BigInt
+  gasUsed: BigInt
 }
 
 type Collection @entity {
   id: ID!
   # tokens: [Token!]! @derivedFrom(field: "collection")\
-  tokens: [Token!]!
+  tokens: [Token!]
   owners: [OwnerCollection!]! @derivedFrom(field: "collection")
 }
   
