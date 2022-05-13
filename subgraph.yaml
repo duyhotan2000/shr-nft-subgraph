@@ -1,4 +1,4 @@
-specVersion: 0.0.2
+specVersion: 0.0.7
 schema:
   file: ./schema.graphql
 dataSources:
@@ -11,7 +11,7 @@ dataSources:
       startBlock: 26091129
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - Token
@@ -22,4 +22,5 @@ dataSources:
       eventHandlers:
         - event: Transfer(indexed address,indexed address,indexed uint256)
           handler: handleTransfer
+          receipt: true
       file: ./src/mapping.ts

@@ -1,4 +1,4 @@
-import { BigDecimal, BigInt, Bytes, log, store } from "@graphprotocol/graph-ts";
+import { BigDecimal, BigInt, Bytes, log, store, ethereum } from "@graphprotocol/graph-ts";
 import {
   SHRNFTTest,
   // AdminChanged,
@@ -144,17 +144,22 @@ export function handleTransfer(event: Transfer): void {
         eip721Token = new Token(id);
         eip721Token.contract = tokenContract.id;
         eip721Token.tokenID = tokenId;
-        eip721Token.creator = newOwner.id
+        eip721Token.creator = newOwner.id;
         eip721Token.mintTime = event.block.timestamp;
-        eip721Token.isFreeMinted = event.transaction.from.toHex().toLowerCase() == OWNER_ADDRESS;
-        eip721Token.transactionFee = event.transaction.gasPrice;
+        eip721Token.isFreeMinted =
+          event.transaction.from.toHex().toLowerCase() == OWNER_ADDRESS;
+        eip721Token.gasPrice = event.transaction.gasPrice;
         eip721Token.transactionHash = event.transaction.hash.toHex();
+        if(event.receipt != null) {
+          eip721Token.gasUsed = event.receipt!.gasUsed;
+          eip721Token.transactionFee = eip721Token.gasUsed.times(eip721Token.gasPrice);
+        }
         // if (tokenContract.supportsEIP721Metadata) {
         let metadataURI = contract.try_tokenURI(tokenId);
-        if(!metadataURI.reverted) {
-            eip721Token.tokenURI = normalize(metadataURI.value);
+        if (!metadataURI.reverted) {
+          eip721Token.tokenURI = normalize(metadataURI.value);
         } else {
-            eip721Token.tokenURI = "";
+          eip721Token.tokenURI = "";
         }
         // } else {
         //     // log.error('tokenURI not supported {}', [tokenContract.id]);
@@ -197,13 +202,13 @@ export function handleTransfer(event: Transfer): void {
       // Update owners of Collection
       // const collectionId = contract.tokenToCollection(tokenId);
       let collection = Collection.load(collectionId);
-      if(collection == null) {
+      if (collection == null) {
         collection = new Collection(collectionId);
         collection.save();
       }
       const ownerCollectionId = to.concat(collectionId);
       let ownerCollection = OwnerCollection.load(ownerCollectionId);
-      if(ownerCollection == null) {
+      if (ownerCollection == null) {
         ownerCollection = new OwnerCollection(ownerCollectionId);
         ownerCollection.owner = to;
         ownerCollection.collection = collectionId;
@@ -214,36 +219,36 @@ export function handleTransfer(event: Transfer): void {
         // mint +1
         all.numTokens = all.numTokens.plus(ONE);
         tokenContract.numTokens = tokenContract.numTokens.plus(ONE);
-        // collection.tokens = [...collection.tokens, eip721Token.id];
         const tokens = collection.tokens;
         tokens.push(eip721Token.id);
         collection.tokens = tokens;
-        if(event.transaction.from.toHex().toLowerCase() == OWNER_ADDRESS) {
+        if (event.transaction.from.toHex().toLowerCase() == OWNER_ADDRESS) {
           all.numFreeMintedTokens = all.numFreeMintedTokens.plus(ONE);
-          all.totalFeeFreeMintedTokens = all.totalFeeFreeMintedTokens.plus(event.transaction.gasPrice);
+          all.totalFeeFreeMintedTokens = all.totalFeeFreeMintedTokens.plus(
+            event.transaction.gasPrice
+          );
         }
         collection.save();
         all.save();
       } else {
         let isTokenFoundInCollection = false;
-        for (let i = 0 ; i < collection.tokens.length ; i ++) {
+        for (let i = 0; i < collection.tokens.length; i++) {
           const token = Token.load(collection.tokens[i]);
-          if(token == null) {
+          if (token == null) {
             continue;
           }
-          if(token.owner == from) {
+          if (token.owner == from) {
             isTokenFoundInCollection = true;
             break;
           }
         }
-        if(isTokenFoundInCollection == false) {
+        if (isTokenFoundInCollection == false) {
           ownerCollection = OwnerCollection.load(from.concat(collectionId));
-          if(ownerCollection != null) {
-            store.remove('OwnerCollection', ownerCollection.id);
+          if (ownerCollection != null) {
+            store.remove("OwnerCollection", ownerCollection.id);
           }
         }
       }
-      
     } else {
       // burn
       store.remove("Token", id);
@@ -251,7 +256,7 @@ export function handleTransfer(event: Transfer): void {
       tokenContract.numTokens = tokenContract.numTokens.minus(ONE);
     }
   }
-  
+
   tokenContract.save();
   all.save();
 

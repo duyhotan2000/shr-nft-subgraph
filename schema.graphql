@@ -18,6 +18,8 @@ type Token @entity {
   isFreeMinted: Boolean!
   transactionFee: BigInt!
   transactionHash: String!
+  gasPrice: BigInt!
+  gasUsed: BigInt!
 }
 
 type Collection @entity {
