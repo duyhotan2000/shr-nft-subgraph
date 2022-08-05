@@ -1,16 +1,20 @@
 {
   "name": "mumbai-nft",
   "license": "UNLICENSED",
+  "workspaces": [
+    "subgraphs/**/*"
+  ],
   "scripts": {
-    "codegen": "graph codegen",
-    "build": "graph build",
-    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ duyhotan2000/mumbai-nft",
-    "create-local": "graph create --node http://localhost:8020/ duyhotan2000/mumbai-nft",
-    "remove-local": "graph remove --node http://localhost:8020/ duyhotan2000/mumbai-nft",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 duyhotan2000/mumbai-nft"
+    "codegen": "lerna run codegen",
+    "build": "lerna run build"
   },
   "dependencies": {
-    "@graphprotocol/graph-cli": "0.30.0-alpha.1",
-    "@graphprotocol/graph-ts": "0.27.0-alpha.1"
+    "@graphprotocol/graph-cli": "0.30.0",
+    "@graphprotocol/graph-ts": "0.27.0",
+    "@openzeppelin/contracts": "^4.7.2",
+    "@openzeppelin/subgraphs": "^0.1.8-5"
+  },
+  "devDependencies": {
+    "lerna": "^5.3.0"
   }
 }

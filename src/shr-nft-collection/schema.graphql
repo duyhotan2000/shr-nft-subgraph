@@ -20,6 +20,7 @@ type Token @entity {
   transactionHash: String!
   gasPrice: BigInt!
   gasUsed: BigInt!
+  tokenURIJson: Bytes
 }
 
 type Collection @entity {
@@ -57,3 +58,5 @@ type OwnerPerTokenContract @entity {
   contract: TokenContract!
   numTokens: BigInt!
 }
+
+

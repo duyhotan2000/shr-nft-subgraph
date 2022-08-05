@@ -1,0 +1,11 @@
+{
+  "name": "shr-self-contract",
+  "description": "SHR NFT Contract",
+  "version": "1.0.0",
+  "author": "SHR",
+  "scripts": {
+    "codegen": "graph codegen subgraph.yaml",
+    "build": "graph build subgraph.yaml",
+    "deploy": "graph deploy --product hosted-service --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ shr/self-contract subgraph.yaml"
+  }
+}

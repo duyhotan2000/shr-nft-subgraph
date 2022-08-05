@@ -1,0 +1,27 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+features:
+  - ipfsOnEthereumContracts
+dataSources:
+  - kind: ethereum
+    name: SHRNFTSelfContract
+    network: matic
+    source:
+      startBlock: 0
+      abi: Ownable
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - CollectibleContract
+        - Owner
+        - All
+      abis:
+        - name: Ownable
+          file: ../../node_modules/@openzeppelin/contracts/build/contracts/Ownable.json
+      eventHandlers:
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+      file: ./mappings/mapping.ts

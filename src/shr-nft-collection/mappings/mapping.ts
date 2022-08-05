@@ -1,11 +1,11 @@
-import { BigDecimal, BigInt, Bytes, log, store, ethereum } from "@graphprotocol/graph-ts";
+import { BigDecimal, BigInt, Bytes, log, store, ipfs, JSONValue, Value, json } from "@graphprotocol/graph-ts";
 import {
   SHRNFTTest,
   // AdminChanged,
   // BeaconUpgraded,
   // Upgraded,
   Transfer,
-} from "../generated/SHRNFTTest/SHRNFTTest";
+} from "../../../generated/SHRNFTTest/SHRNFTTest";
 import {
   All,
   Collection,
@@ -14,14 +14,14 @@ import {
   OwnerPerTokenContract,
   Token,
   TokenContract,
-} from "../generated/schema";
+} from "../../../generated/schema";
 
 let ZERO_ADDRESS_STRING = "0x0000000000000000000000000000000000000000";
 
 let ZERO_ADDRESS: Bytes = Bytes.fromHexString(ZERO_ADDRESS_STRING) as Bytes;
 let ZERO = BigInt.fromI32(0);
 let ONE = BigInt.fromI32(1);
-let OWNER_ADDRESS = "0xFaBbAD57EA3352165dD4780849Be4132FD837015".toLowerCase();
+let OWNER_ADDRESS = "0xf2Cf01e96aceD873A1DE9BEad8375292b44ee5D2".toLowerCase();
 
 function toBytes(hexString: String): Bytes {
   let result = new Uint8Array(hexString.length / 2);
@@ -162,8 +162,12 @@ export function handleTransfer(event: Transfer): void {
         let metadataURI = contract.try_tokenURI(tokenId);
         if (!metadataURI.reverted) {
           eip721Token.tokenURI = normalize(metadataURI.value);
+          const hash = eip721Token.tokenURI.replace("ipfs://", "");
+          const data = ipfs.cat(hash);
+          eip721Token.tokenURIJson = data;
         } else {
           eip721Token.tokenURI = "";
+          eip721Token.tokenURIJson = null;
         }
         // } else {
         //     // log.error('tokenURI not supported {}', [tokenContract.id]);

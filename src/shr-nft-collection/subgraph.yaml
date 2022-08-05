@@ -1,14 +1,18 @@
 specVersion: 0.0.5
 schema:
   file: ./schema.graphql
+features:
+  - ipfsOnEthereumContracts
 dataSources:
   - kind: ethereum
     name: SHRNFTTest
-    network: mumbai
+    network: matic
     source:
-      address: "0x418130a4DfBeaEb3A97214D5E83C7C890413e9e9"
+      # address: "0x418130a4DfBeaEb3A97214D5E83C7C890413e9e9"
+      address: "0xaeB1b553b656916bC924dA7e67BB0A118D6c16CD"
       abi: SHRNFTTest
-      startBlock: 26091129
+      # startBlock: 26091129
+      startBlock: 28655672
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -23,4 +27,4 @@ dataSources:
         - event: Transfer(indexed address,indexed address,indexed uint256)
           handler: handleTransfer
           receipt: true
-      file: ./src/mapping.ts
+      file: ./mappings/mapping.ts
