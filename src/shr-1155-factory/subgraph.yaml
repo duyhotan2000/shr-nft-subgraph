@@ -1,0 +1,54 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: SHRNFT1155Factory
+    network: mumbai
+    source:
+      address: "0xfa377dfaea99afdb71725b1add4c5269a1811ca9"
+      startBlock: 27554724
+      abi: Factory
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - CollectibleContract
+        - Owner
+        - All
+      abis:
+        - name: Factory
+          file: ./abis/SHRNFT1155Factory.json
+      eventHandlers:
+        - event: ERC1155Created(address,address)
+          handler: handleERC1155Created
+        - event: ERC1155Minted(address,address,uint256)
+          handler: handleERC1155Minted
+      file: ./mappings/factory.ts
+templates:
+  - name: Collection
+    kind: ethereum/contract
+    network: mumbai
+    source:
+      abi: ERC1155Contract
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./mappings/erc1155.ts
+      entities:
+        - CollectibleContract
+        - Owner
+      abis:
+        - name: ERC1155Contract
+          file: ./abis/SHRNFT1155Contract.json
+      eventHandlers:
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: URI(string,indexed uint256)
+          handler: handleURI
+        - event: TransferSingle(indexed address,indexed address,indexed address,uint256,uint256)
+          handler: handleTransferSingle
+        - event: TransferBatch(indexed address,indexed address,indexed address,uint256[],uint256[])
+          handler: handleTransferBatch

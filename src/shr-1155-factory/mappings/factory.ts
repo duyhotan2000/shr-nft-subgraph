@@ -1,7 +1,7 @@
 import { BigDecimal, BigInt, Bytes, log, store, ipfs, JSONValue, Value, json } from "@graphprotocol/graph-ts";
 import {
-  OwnershipTransferred as OwnershipTransferredEvent
-} from "../generated/SHRNFTSelfContract/Ownable";
+  ERC1155Created as ERC1155CreatedEvent
+} from "../generated/SHRNFT1155Factory/Factory";
 import {
   All,
   CollectibleContract,
@@ -9,9 +9,14 @@ import {
 } from "../generated/schema";
 
 import {
+  ERC1155Contract
+} from "../generated/templates/Collection/ERC1155Contract";
+
+import {
 	events,
 	transactions,
 } from '@amxx/graphprotocol-utils'
+import { Collection } from "../generated/templates";
 
 let ZERO_ADDRESS_STRING = "0x0000000000000000000000000000000000000000";
 
@@ -50,6 +55,37 @@ function normalize(strValue: string): string {
   }
 }
 
-export function handleOwnershipTransferred(event: OwnershipTransferredEvent) {
-  
+export function handleERC1155Created(event: ERC1155CreatedEvent): void {
+  let all = All.load("all");
+  if (all == null) {
+    all = new All("all");
+    all.totalNumCollectibleContracts = ZERO;
+    all.totalNumTokens = ZERO;
+    all.totalNumOwners = ZERO;
+    // all.numTokenContracts = ZERO;
+  }
+  let owner = Owner.load(event.params.owner.toHexString());
+  if(owner == null) {
+    owner = new Owner(event.params.owner.toHexString());
+    owner.save();
+  }
+  let contract = new CollectibleContract(event.params.tokenContract.toHexString());
+  contract.creator = owner.id;
+  contract.owner = owner.id;
+  let contractABI = ERC1155Contract.bind(event.params.tokenContract);
+  let name = contractABI.try_name();
+  if (!name.reverted) {
+    contract.name = normalize(name.value);
+  }
+  let symbol = contractABI.try_symbol();
+  if (!symbol.reverted) {
+    contract.symbol = normalize(symbol.value);
+  }
+  let contractURI = contractABI.try_contractURI();
+  if (!contractURI.reverted) {
+    contract.uri = normalize(contractURI.value);
+  }
+  contract.uri = contractABI.contractURI();
+  contract.save();
+  Collection.create(event.params.tokenContract);
 }

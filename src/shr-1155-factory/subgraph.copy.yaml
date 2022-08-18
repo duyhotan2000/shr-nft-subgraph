@@ -8,6 +8,7 @@ dataSources:
     name: SHRNFTSelfContract
     network: matic
     source:
+      address: 0xD347A32f701F5D611D36Ce57ff558A70Fd9d6A20
       startBlock: 0
       abi: Ownable
     mapping:

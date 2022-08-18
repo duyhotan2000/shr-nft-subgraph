@@ -1,0 +1,52 @@
+type All @entity {
+  id: ID!
+  totalNumCollectibleContracts: BigInt!
+  totalNumTokens: BigInt!
+  totalNumOwners: BigInt!
+}
+
+type Token @entity {
+  id: ID!
+  amount: BigInt!
+  contract: CollectibleContract!
+  tokenID: BigInt!
+  owners: [Owner!]
+  balances: [Balance!]
+  creator: Owner!
+  # mintTime: BigInt!
+  tokenURI: String!
+  tokenURIJson: Bytes
+}
+
+type CollectibleContract @entity {
+  id: ID!
+  name: String
+  symbol: String
+  uri: String
+  owner: Owner!
+  creator: Owner!
+  tokenOwners: [Owner!]
+  tokens: [Token!]
+}
+
+# type OwnerCollectibleContract @entity {
+#   id: ID! # Set to `owner.id.concat(collection.id)`
+#   owner: Owner!
+#   collection: CollectibleContract! 
+# }
+
+type Owner @entity {
+  id: ID!
+  tokens: [Token!]!
+  numTokens: BigInt!
+  collectibles: [CollectibleContract!] @derivedFrom(field: "owner")
+}
+
+type Balance @entity {
+  id: ID!
+  owner: Owner!
+  amount: BigInt!
+}
+
+
+
